@@ -8,6 +8,7 @@ Efficient tree structures in [Mongoose](http://mongoosejs.com/index.html) using 
  - One-query retrieval of ancestors
  - Automatically updates ancestors and children on change to parent
  - Reparent children to grandparent on delete
+ - Get ancestors for multiple documents in a single query
 
 ## Usage
 
@@ -199,7 +200,7 @@ adam.getChildrenTree( function(err, users) {
 
 ```
 
-### getAncestors
+### getAncestors (instance)
 
 Signature:
 
@@ -211,6 +212,26 @@ Based on the above hierarchy:
 carol.getAncestors(function(err, users) {
   // users is an array of adam and bob
 })
+```
+
+### getAncestors (static)
+
+Get all ancestors for a collection of documents. Optimized to execute in a single query, rather than one per document.
+
+Signature:
+
+    Model.getAncestors(documents, [filters], [fields], [options], cb);
+
+Based on the above hierarchy:
+
+```javascript
+User.getAncestors([carol, bob], function(err, users) {
+  console.log(users);
+})
+// [
+//   [{name: 'Adam'}, {'name': 'Bob'}],
+//   [{name: 'Adam'}]
+// ]
 ```
 
 ### level

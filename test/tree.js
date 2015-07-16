@@ -50,8 +50,10 @@ describe('tree tests', function () {
             var carol = new User({name: 'Carol', parent: adam });
             var dann = new User({name: 'Dann', parent: carol });
             var emily = new User({name: 'Emily', parent: dann });
+            var joe = new User({name: 'Joe'});
+            var paul = new User({name: 'Paul', parent: joe});
 
-            Async.forEachSeries([adam, bob, carol, dann, emily, eden], function (doc, cb) {
+            Async.forEachSeries([adam, bob, carol, dann, emily, eden, joe, paul], function (doc, cb) {
 
                 doc.save(cb);
             }, done);
@@ -101,7 +103,7 @@ describe('tree tests', function () {
                     User.find(function (err, users) {
 
                         should.not.exist(err);
-                        users.length.should.equal(5);
+                        users.length.should.equal(7);
                         _.pluck(users, 'name').should.not.include('Emily');
                         done();
                     });
@@ -123,7 +125,7 @@ describe('tree tests', function () {
 
                         should.not.exist(err);
 
-                        users.length.should.equal(3);
+                        users.length.should.equal(5);
                         _.pluck(users, 'name').should.include('Adam').and.include('Bob');
                         done();
                     });
@@ -289,14 +291,13 @@ describe('tree tests', function () {
     });
 
 
-    describe('get ancestors', function () {
+    describe('get ancestors (instance)', function () {
 
         it('should return ancestors', function (done) {
 
             User.findOne({ 'name': 'Dann' }, function (err, dann) {
 
                 dann.getAncestors(function (err, ancestors) {
-
                     should.not.exist(err);
                     ancestors.length.should.equal(2);
                     _.pluck(ancestors, 'name').should.include('Carol').and.include('Adam');
@@ -340,6 +341,57 @@ describe('tree tests', function () {
         });
     });
 
+    describe('get ancestors (static)', function () {
+
+        it('should return ancestors', function (done) {
+
+            User.find({ $or: [{name: 'Paul'}, {name: 'Emily'}]}, function (err, users) {
+
+                User.getAncestors(users, function (err, ancestors) {
+                    should.not.exist(err);
+                    ancestors.length.should.equal(2);
+                    ancestors = [].concat(ancestors[0], ancestors[1]);
+                    _.pluck(ancestors, 'name').should.include('Adam').and.include('Carol').and.include('Dann').and.include('Joe');
+                    done();
+                });
+            });
+        });
+
+
+        it('should return ancestors with only name and _id fields', function (done) {
+
+            User.findOne({ 'name': 'Dann' }, function (err, dann) {
+
+                User.getAncestors([dann], {}, 'name', function (err, ancestors) {
+                    should.not.exist(err);
+                    ancestors = ancestors[0];
+                    ancestors.length.should.equal(2);
+                    ancestors[0].should.not.have.property('parent');
+                    ancestors[0].should.have.property('name');
+                    _.pluck(ancestors, 'name').should.include('Carol').and.include('Adam');
+                    done();
+                });
+            });
+        });
+
+
+        it('should return ancestors sorted on name and without wrappers', function (done) {
+
+            User.findOne({ 'name': 'Dann' }, function (err, dann) {
+
+                User.getAncestors([dann], {}, null, {sort: {name: -1}, lean: 1}, function (err, ancestors) {
+                    should.not.exist(err);
+                    ancestors = ancestors[0];
+                    ancestors.length.should.equal(2);
+                    ancestors[0].name.should.equal('Carol');
+                    should.not.exist(ancestors[0].getAncestors);
+                    _.pluck(ancestors, 'name').should.include('Carol').and.include('Adam');
+                    done();
+                });
+            });
+        });
+    });
+
 
     describe('get children tree', function () {
 
@@ -348,7 +400,7 @@ describe('tree tests', function () {
             User.getChildrenTree(function (err, childrenTree) {
 
                 should.not.exist(err);
-                childrenTree.length.should.equal(2);
+                childrenTree.length.should.equal(3);
 
                 var adamTree = _.find(childrenTree, function(x){ return x.name == 'Adam'});
                 var edenTree = _.find(childrenTree, function(x){ return x.name == 'Eden'});
