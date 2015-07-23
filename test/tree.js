@@ -63,7 +63,7 @@ describe('tree tests', function () {
 
     describe('adding documents', function () {
 
-        it('should set parent id and path', function (done) {
+        it('should set parent id, path, and level', function (done) {
 
             User.find({}, function (err, users) {
 
@@ -83,6 +83,12 @@ describe('tree tests', function () {
 
                 var expectedPath = [names['Adam']._id, names['Carol']._id, names['Dann']._id].join('.');
                 names['Dann'].path.should.equal(expectedPath);
+
+                // Level tests
+                names['Adam'].level.should.equal(1);
+                names['Bob'].level.should.equal(2);
+                names['Dann'].level.should.equal(3);
+                names['Emily'].level.should.equal(4);
 
                 done();
             });
@@ -162,14 +168,13 @@ describe('tree tests', function () {
 
     describe('moving documents', function () {
 
-        it('should change children paths', function (done) {
+        it('should change children paths and update level', function (done) {
 
             User.find({}, function (err, users) {
                 should.not.exist(err);
 
                 var names = {};
                 users.forEach(function (user) {
-
                     names[user.name] = user;
                 });
 
@@ -178,12 +183,26 @@ describe('tree tests', function () {
 
                 carol.parent = bob;
                 carol.save(function (err) {
+                    User.find({}, function (err, users) {
+                        should.not.exist(err);
 
-                    should.not.exist(err);
-                    checkPaths(done);
+                        var names = {};
+
+                        users.forEach(function (user) {
+                            names[user.name] = user;
+                        });
+
+                        carol.level.should.equal(3);
+                        names['Dann'].level.should.equal(4);
+                        names['Emily'].level.should.equal(5);
+
+                        checkPaths(done);
+                    });
                 });
             });
         });
+
+
     });
 
 
@@ -274,22 +293,6 @@ describe('tree tests', function () {
             });
         });
     });
-
-
-    describe('level virtual', function () {
-
-        it('should equal the number of ancestors', function (done) {
-
-            User.findOne({ 'name': 'Dann' }, function (err, dann) {
-
-                should.not.exist(err);
-
-                dann.level.should.equal(3);
-                done();
-            });
-        });
-    });
-
 
     describe('get ancestors (instance)', function () {
 
