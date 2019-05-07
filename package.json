@@ -8,17 +8,18 @@
     "Oleg Butovich <obutovich@gmail.com>",
     "Jake Dempsey <angelo0000@gmail.com>",
     "Alban Escalier (DaWyz)",
-    "Jamie Czerwinski <jamie.czerwinski@gmail.com>"
+    "Jamie Czerwinski <jamie.czerwinski@gmail.com>",
+    "Luigi Balzano <info@selfget.com>"
   ],
   "name": "mongoose-path-tree",
   "description": "Efficient tree structures in Mongoose using materialized paths.",
-  "homepage": "https://github.com/swayf/mongoose-path-tree",
+  "homepage": "https://github.com/selfget/mongoose-path-tree",
   "repository": {
     "type": "git",
-    "url": "git://github.com/swayf/mongoose-path-tree.git"
+    "url": "git://github.com/selfget/mongoose-path-tree.git"
   },
   "main": "index.js",
-  "version": "1.5.6",
+  "version": "1.5.7",
   "engine": "node >= 0.8.0",
   "dependencies": {
     "bluebird": "^3.4.7",
