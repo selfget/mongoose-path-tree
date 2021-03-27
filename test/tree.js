@@ -8,7 +8,7 @@ var util = require('util');
 
 var Schema = Mongoose.Schema;
 
-Mongoose.connect(process.env.MONGODB_URI || 'mongodb://tree:tree@localhost:27017/mongoose-path-tree');
+Mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/mongoose-path-tree');
 
 Mongoose.Promise = require('bluebird');
 
